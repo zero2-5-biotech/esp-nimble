@@ -17,6 +17,7 @@
 #include "host/ble_gap.h"
 #include "nimble/hci_common.h"
 #include "mesh/porting.h"
+#include "nimble/nimble_port.h"
 
 #include "adv.h"
 #include "net.h"
@@ -332,8 +333,8 @@ void bt_mesh_adv_init(void)
 	             MYNEWT_VAL(BLE_MESH_ADV_TASK_PRIO), OS_WAIT_FOREVER,
 	             g_blemesh_stack, ADV_STACK_SIZE);
 #else
-    	xTaskCreate(mesh_adv_thread, "mesh_adv", 2768,
-            NULL, (configMAX_PRIORITIES - 4), &adv_task_h);
+    xTaskCreatePinnedToCore(mesh_adv_thread, "mesh_adv", 2768,
+            NULL, (configMAX_PRIORITIES - 5), &adv_task_h, NIMBLE_CORE);
 #endif
 
 	/* For BT5 controllers we can have fast advertising interval */
