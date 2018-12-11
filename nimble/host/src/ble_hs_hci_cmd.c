@@ -478,7 +478,10 @@ ble_hs_hci_cmd_body_le_create_connection(const struct hci_create_conn *hcc,
     }
 
     /* Check connection latency */
-    if ((hcc->conn_latency < BLE_HCI_CONN_LATENCY_MIN) ||
+    if (
+#if BLE_HCI_CONN_LATENCY_MIN
+	(hcc->conn_latency < BLE_HCI_CONN_LATENCY_MIN) ||
+#endif
         (hcc->conn_latency > BLE_HCI_CONN_LATENCY_MAX)) {
         return BLE_ERR_INV_HCI_CMD_PARMS;
     }
@@ -1379,7 +1382,10 @@ ble_hs_hci_check_conn_params(uint8_t phy,
     }
 
     /* Check connection latency */
-    if ((params->conn_latency < BLE_HCI_CONN_LATENCY_MIN) ||
+    if (
+#if BLE_HCI_CONN_LATENCY_MIN
+	(params->conn_latency < BLE_HCI_CONN_LATENCY_MIN) ||
+#endif
         (params->conn_latency > BLE_HCI_CONN_LATENCY_MAX)) {
         return BLE_ERR_INV_HCI_CMD_PARMS;
     }
