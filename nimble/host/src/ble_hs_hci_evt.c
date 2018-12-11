@@ -671,7 +671,10 @@ ble_hs_hci_evt_le_conn_upd_complete(uint8_t subevent, uint8_t *data, int len)
 
             return BLE_HS_EBADDATA;
         }
-        if (evt.conn_latency < BLE_HCI_CONN_LATENCY_MIN ||
+        if (
+#if BLE_HCI_CONN_LATENCY_MIN
+	   (evt.conn_latency < BLE_HCI_CONN_LATENCY_MIN) ||
+#endif
             evt.conn_latency > BLE_HCI_CONN_LATENCY_MAX) {
 
             return BLE_HS_EBADDATA;
@@ -729,7 +732,10 @@ ble_hs_hci_evt_le_conn_parm_req(uint8_t subevent, uint8_t *data, int len)
 
         return BLE_HS_EBADDATA;
     }
-    if (evt.latency < BLE_HCI_CONN_LATENCY_MIN ||
+    if (
+#if BLE_HCI_CONN_LATENCY_MIN
+	(evt.latency < BLE_HCI_CONN_LATENCY_MIN) ||
+#endif
         evt.latency > BLE_HCI_CONN_LATENCY_MAX) {
 
         return BLE_HS_EBADDATA;
