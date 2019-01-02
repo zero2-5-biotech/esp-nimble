@@ -139,7 +139,7 @@ ble_hs_dbg_le_event_disp(uint8_t subev, uint8_t len, uint8_t *evdata)
         break;
 
     case BLE_HCI_LE_SUBEV_LT_KEY_REQ:
-            BLE_HS_LOG(DEBUG, "LE LTK Req. handle=%u rand=%lx%lx encdiv=%u\n",
+            BLE_HS_LOG(DEBUG, "LE LTK Req. handle=%u rand=%x%x encdiv=%u\n",
                        get_le16(evdata), get_le32(evdata + 6),
                        get_le32(evdata + 2), get_le16(evdata + 10));
         break;
@@ -511,7 +511,7 @@ ble_hs_dbg_cmd_comp_info_params(uint8_t status, uint8_t ocf, uint8_t *evdata)
         }
         break;
     case BLE_HCI_OCF_IP_RD_LOC_SUPP_FEAT:
-        BLE_HS_LOG(DEBUG, "supp_feat=0x%lx%08lx",
+        BLE_HS_LOG(DEBUG, "supp_feat=0x%x%08x",
                    get_le32(evdata + 4), get_le32(evdata));
         break;
     case BLE_HCI_OCF_IP_RD_BD_ADDR:
@@ -585,7 +585,7 @@ ble_hs_dbg_cmd_complete_disp(uint8_t *evdata, uint8_t len)
                        get_le16(evdata + 4), get_le16(evdata + 6));
             break;
         case BLE_HCI_OCF_LE_RD_SUPP_STATES:
-            BLE_HS_LOG(DEBUG, "states=0x%lx%08lx", get_le32(evdata + 4),
+            BLE_HS_LOG(DEBUG, "states=0x%x%08x", get_le32(evdata + 4),
                        get_le32(evdata));
             break;
         case BLE_HCI_OCF_LE_ENCRYPT:
