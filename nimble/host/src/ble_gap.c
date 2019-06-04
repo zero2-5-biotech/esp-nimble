@@ -5682,3 +5682,9 @@ ble_gap_init(void)
 err:
     return rc;
 }
+
+void
+ble_gap_deinit(void)
+{
+    ble_npl_mutex_deinit(&preempt_done_mutex);
+}
