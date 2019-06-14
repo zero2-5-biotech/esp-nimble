@@ -2046,5 +2046,5 @@ ble_hs_test_util_init(void)
     ble_hs_test_util_hci_out_clear();
 
     /* Clear random address. */
-    ble_hs_test_util_set_static_rnd_addr((uint8_t[6]){ 0, 0, 0, 0, 0, 0 });
+    ble_hs_id_rnd_reset();
 }
