@@ -4380,10 +4380,14 @@ ble_gap_unpair(const ble_addr_t *peer_addr)
         return BLE_HS_EINVAL;
     }
 
+    ble_hs_lock();
+
     conn = ble_hs_conn_find_by_addr(peer_addr);
     if (conn != NULL) {
         ble_gap_terminate(conn->bhc_handle, BLE_ERR_REM_USER_CONN_TERM);
     }
+
+    ble_hs_unlock();
 
     ble_hs_pvcy_remove_entry(peer_addr->type,
                              peer_addr->val);
