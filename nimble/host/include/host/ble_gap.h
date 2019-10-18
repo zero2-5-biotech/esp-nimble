@@ -124,6 +124,7 @@ struct hci_conn_update;
 #define BLE_GAP_EVENT_REPEAT_PAIRING        17
 #define BLE_GAP_EVENT_PHY_UPDATE_COMPLETE   18
 #define BLE_GAP_EVENT_EXT_DISC              19
+#define BLE_GAP_EVENT_PAIRING_REQUEST       20
 
 /*** Reason codes for the subscribe GAP event. */
 
@@ -304,6 +305,15 @@ struct ble_gap_disc_desc {
      * direct address fields are not present.
      */
     ble_addr_t direct_addr;
+};
+
+struct ble_gap_pairing_req {
+    uint16_t conn_handle;
+    /** Properties of the existing pairing request */
+    uint8_t io_cap;
+    uint8_t oob_data_flag;
+    uint8_t authreq;
+    uint8_t max_enc_key_size;
 };
 
 struct ble_gap_repeat_pairing {
@@ -674,6 +684,20 @@ struct ble_gap_event {
             /** The handle of the relevant connection. */
             uint16_t conn_handle;
         } identity_resolved;
+
+        /**
+         * Represents a pairing request from peer.
+         *
+         * Valid for following event types:
+         *     o BLE_GAP_EVENT_PAIRING_REQUEST
+         * The application can accept or reject pairing request. For accepting
+         * the application should return 0 and for rejecting the request the
+         * application should provide appropriate error return code,
+         * e.g. BLE_SM_ERR_AUTHREQ
+         *     o Accept : Return 0
+         *     o Reject : Return appropriate error BLE_SM_*
+         */
+        struct ble_gap_pairing_req pairing_req;
 
         /**
          * Represents a peer's attempt to pair despite a bond already existing.
