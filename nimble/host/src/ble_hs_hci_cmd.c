@@ -74,7 +74,7 @@ ble_hs_hci_cmd_send(uint16_t opcode, uint8_t len, const void *cmddata)
     buf = ble_hci_trans_buf_alloc(BLE_HCI_TRANS_BUF_CMD);
     BLE_HS_DBG_ASSERT(buf != NULL);
 
-    /* Hack for avoiding memcpy while handling tx pkt to VHCI, 
+    /* Hack for avoiding memcpy while handling tx pkt to VHCI,
      * keep one byte for type field*/
     buf++;
     put_le16(buf, opcode);
@@ -923,7 +923,7 @@ ble_hs_hci_cmd_body_remove_from_resolv_list(uint8_t addr_type,
                                             uint8_t *dst)
 {
     if (addr_type > BLE_ADDR_RANDOM) {
-        return BLE_ERR_INV_HCI_CMD_PARMS;
+        addr_type = addr_type % 2;
     }
 
     dst[0] = addr_type;
