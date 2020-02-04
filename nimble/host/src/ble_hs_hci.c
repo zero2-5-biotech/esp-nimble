@@ -380,19 +380,19 @@ ble_hs_hci_rx_ack(uint8_t *ack_ev)
 int
 ble_hs_hci_rx_evt(uint8_t *hci_ev, void *arg)
 {
-    int enqueue;
+    int enqueue = 0;
 
     BLE_HS_DBG_ASSERT(hci_ev != NULL);
 
     switch (hci_ev[0]) {
     case BLE_HCI_EVCODE_COMMAND_COMPLETE:
-        if (hci_ev[2] == 0 && hci_ev[3] == 0) {
+        if (hci_ev[3] == 0 && hci_ev[4] == 0) {
             enqueue = 1;
         }
         break;
 
     case BLE_HCI_EVCODE_COMMAND_STATUS:
-        if (hci_ev[3] == 0 && hci_ev[4] == 0) {
+        if (hci_ev[4] == 0 && hci_ev[5] == 0) {
             enqueue = 1;
         }
         break;
