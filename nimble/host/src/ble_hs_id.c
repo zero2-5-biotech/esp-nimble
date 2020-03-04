@@ -58,14 +58,20 @@ ble_hs_id_set_rnd(const uint8_t *rnd_addr)
 {
     uint8_t addr_type_byte;
     int rc;
-    uint8_t all_zeros[BLE_DEV_ADDR_LEN] = {0}, all_ones[BLE_DEV_ADDR_LEN] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    int i, rnd_part_sum = 0;
 
     ble_hs_lock();
 
-    /* Make sure all bits of rnd_addr are neither one nor zero */
+    /* Make sure random part of rnd_addr is not all ones or zeros */
     addr_type_byte = rnd_addr[5] & 0xc0;
+    for (i = 0; i < BLE_DEV_ADDR_LEN; i++) {
+        rnd_part_sum += *(rnd_addr + i);
+    }
+    rnd_part_sum -= addr_type_byte;
+
+    /* All ones in random part: 5*(0xFF) + 0x3F = 0x53A  */
     if ((addr_type_byte != 0x00 && addr_type_byte != 0xc0) ||
-        !memcmp(rnd_addr, all_zeros, BLE_DEV_ADDR_LEN) || !memcmp(rnd_addr, all_ones, BLE_DEV_ADDR_LEN)) {
+        (rnd_part_sum == 0) || (rnd_part_sum == 0x53A)) {
         rc = BLE_HS_EINVAL;
         goto done;
     }
