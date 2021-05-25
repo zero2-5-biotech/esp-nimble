@@ -87,14 +87,18 @@ ble_sm_alg_encrypt(uint8_t *key, uint8_t *plaintext, uint8_t *enc_data)
 
     mbedtls_aes_init(&s);
     if (mbedtls_aes_setkey_enc(&s, tmp, 128) != 0) {
+        mbedtls_aes_free(&s);
         return BLE_HS_EUNKNOWN;
     }
 
     swap_buf(tmp, plaintext, 16);
 
     if (mbedtls_aes_crypt_ecb(&s, MBEDTLS_AES_ENCRYPT, tmp, enc_data) != 0) {
+        mbedtls_aes_free(&s);
         return BLE_HS_EUNKNOWN;
     }
+
+    mbedtls_aes_free(&s);
 #else
     struct tc_aes_key_sched_struct s;
 
