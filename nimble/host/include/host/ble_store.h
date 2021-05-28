@@ -85,6 +85,8 @@ struct ble_store_value_sec {
 
     unsigned authenticated:1;
     uint8_t sc:1;
+
+    uint16_t peer_rr_id;
 };
 
 /**
@@ -118,6 +120,7 @@ struct ble_store_value_cccd {
     uint16_t chr_val_handle;
     uint16_t flags;
     unsigned value_changed:1;
+    uint16_t peer_rr_id;
 };
 
 /**
@@ -290,6 +293,8 @@ int ble_store_clear(void);
 int ble_store_util_bonded_peers(ble_addr_t *out_peer_id_addrs,
                                 int *out_num_peers,
                                 int max_peers);
+int ble_store_util_bonded_peers_rr(ble_addr_t *out_peer_id_addrs, int *out_peer_rr_id,
+                                   int *out_num_peers, int max_peers);
 int ble_store_util_delete_all(int type, const union ble_store_key *key);
 int ble_store_util_delete_peer(const ble_addr_t *peer_id_addr);
 int ble_store_util_delete_oldest_peer(void);

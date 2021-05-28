@@ -923,7 +923,7 @@ ble_hs_hci_cmd_body_remove_from_resolv_list(uint8_t addr_type,
                                             uint8_t *dst)
 {
     if (addr_type > BLE_ADDR_RANDOM) {
-        return BLE_ERR_INV_HCI_CMD_PARMS;
+        addr_type = addr_type % 2;
     }
 
     dst[0] = addr_type;

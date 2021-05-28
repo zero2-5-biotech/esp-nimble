@@ -4375,25 +4375,22 @@ int
 ble_gap_unpair(const ble_addr_t *peer_addr)
 {
     struct ble_hs_conn *conn;
-    int rc;
 
     if (ble_addr_cmp(peer_addr, BLE_ADDR_ANY) == 0) {
         return BLE_HS_EINVAL;
     }
 
+    ble_hs_lock();
+
     conn = ble_hs_conn_find_by_addr(peer_addr);
     if (conn != NULL) {
-        rc = ble_gap_terminate(conn->bhc_handle, BLE_ERR_REM_USER_CONN_TERM);
-        if ((rc != BLE_HS_EALREADY) && (rc != BLE_HS_ENOTCONN)) {
-            return rc;
-        }
+        ble_gap_terminate(conn->bhc_handle, BLE_ERR_REM_USER_CONN_TERM);
     }
 
-    rc = ble_hs_pvcy_remove_entry(peer_addr->type,
-                                  peer_addr->val);
-    if (rc != 0) {
-        return rc;
-    }
+    ble_hs_unlock();
+
+    ble_hs_pvcy_remove_entry(peer_addr->type,
+                             peer_addr->val);
 
     return ble_store_util_delete_peer(peer_addr);
 }
@@ -4421,6 +4418,175 @@ ble_gap_unpair_oldest_peer(void)
     }
 
     return 0;
+}
+
+int
+ble_gap_unpair_oldest_except(const ble_addr_t *peer_addr)
+{
+    ble_addr_t peer_id_addrs[MYNEWT_VAL(BLE_STORE_MAX_BONDS)];
+    int num_peers;
+    int rc, i;
+
+    rc = ble_store_util_bonded_peers(
+            &peer_id_addrs[0], &num_peers, MYNEWT_VAL(BLE_STORE_MAX_BONDS));
+    if (rc != 0) {
+        return rc;
+    }
+
+    if (num_peers == 0) {
+        return BLE_HS_ENOENT;
+    }
+
+    for (i = 0; i < num_peers; i++) {
+        if (ble_addr_cmp(peer_addr, &peer_id_addrs[i]) != 0) {
+            break;
+        }
+    }
+
+    if (i >= num_peers) {
+        return BLE_HS_ENOMEM;
+    }
+
+    return ble_gap_unpair(&peer_id_addrs[i]);
+}
+
+int
+ble_gap_unpair_oldest_peer_rr(void)
+{
+    ble_addr_t peer_id_addrs[MYNEWT_VAL(BLE_STORE_MAX_BONDS)];
+    int peer_rr_id[MYNEWT_VAL(BLE_STORE_MAX_BONDS)];
+    int num_peers;
+    int rc;
+    int oldest_peer_id;
+    int oldest_index;
+
+    rc = ble_store_util_bonded_peers_rr(
+            &peer_id_addrs[0], &peer_rr_id[0], &num_peers, MYNEWT_VAL(BLE_STORE_MAX_BONDS));
+
+#if 1
+    ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "rc 1: %d", rc);
+    ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "num_peers: %d", num_peers);
+    for (int i=0; i<num_peers; i++)
+    {
+        ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "peer_id_addrs[%d].val: %02X %02X %02X %02X %02X %02X", i,
+                  peer_id_addrs[i].val[0],
+                  peer_id_addrs[i].val[1],
+                  peer_id_addrs[i].val[2],
+                  peer_id_addrs[i].val[3],
+                  peer_id_addrs[i].val[4],
+                  peer_id_addrs[i].val[5]);
+        ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "peer_rr_id[%d]: %d", i, peer_rr_id[i]);
+    }
+#endif
+
+    if (rc != 0) {
+        return rc;
+    }
+
+    if (num_peers == 0) {
+        return 0;
+    }
+
+    oldest_peer_id = peer_rr_id[0];
+    oldest_index = 0;
+    for (int i=1; i<num_peers; i++)
+    {
+        if (oldest_peer_id > peer_rr_id[i])
+        {
+            oldest_peer_id = peer_rr_id[i];
+            oldest_index = i;
+        }
+    }
+
+#if 1
+    ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "oldest_index: %d", oldest_index);
+    ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "oldest_peer_id_addr.type: %d", peer_id_addrs[oldest_index].type);
+    ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "oldest_peer_id_addr.val: %02X %02X %02X %02X %02X %02X", 
+              peer_id_addrs[oldest_index].val[0],
+              peer_id_addrs[oldest_index].val[1],
+              peer_id_addrs[oldest_index].val[2],
+              peer_id_addrs[oldest_index].val[3],
+              peer_id_addrs[oldest_index].val[4],
+              peer_id_addrs[oldest_index].val[5]);
+#endif
+
+    rc = ble_gap_unpair(&peer_id_addrs[oldest_index]);
+    ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "rc 2: %d", rc);
+    if (rc != 0) {
+        return rc;
+    }
+
+    return 0;
+}
+
+int
+ble_gap_unpair_oldest_except_rr(const ble_addr_t *peer_addr)
+{
+    ble_addr_t peer_id_addrs[MYNEWT_VAL(BLE_STORE_MAX_BONDS)];
+    int peer_rr_id[MYNEWT_VAL(BLE_STORE_MAX_BONDS)];
+    int num_peers;
+    int rc, i;
+    int oldest_peer_id;
+    int oldest_index;
+
+    rc = ble_store_util_bonded_peers_rr(
+            &peer_id_addrs[0], &peer_rr_id[0], &num_peers, MYNEWT_VAL(BLE_STORE_MAX_BONDS));
+
+#if 1
+    ESP_LOGI("ble_gap_unpair_oldest_except_rr", "rc 1: %d", rc);
+    ESP_LOGI("ble_gap_unpair_oldest_except_rr", "num_peers: %d", num_peers);
+    for (int i=0; i<num_peers; i++)
+    {
+        ESP_LOGI("ble_gap_unpair_oldest_except_rr", "peer_id_addrs[%d].val: %02X %02X %02X %02X %02X %02X", i,
+                  peer_id_addrs[i].val[0],
+                  peer_id_addrs[i].val[1],
+                  peer_id_addrs[i].val[2],
+                  peer_id_addrs[i].val[3],
+                  peer_id_addrs[i].val[4],
+                  peer_id_addrs[i].val[5]);
+        ESP_LOGI("ble_gap_unpair_oldest_except_rr", "peer_rr_id[%d]: %d", i, peer_rr_id[i]);
+    }
+#endif
+
+    if (rc != 0) {
+        return rc;
+    }
+
+    if (num_peers == 0) {
+        return BLE_HS_ENOENT;
+    }
+
+    oldest_peer_id = peer_rr_id[0];
+    oldest_index = 0;
+    for (i=1; i<num_peers; i++)
+    {
+        if (oldest_peer_id > peer_rr_id[i])
+        {
+            if (ble_addr_cmp(peer_addr, &peer_id_addrs[i]) != 0)
+            {
+                oldest_peer_id = peer_rr_id[i];
+                oldest_index = i;
+            }
+        }
+    }
+
+#if 1
+    ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "oldest_index: %d", oldest_index);
+    ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "oldest_peer_id_addr.type: %d", peer_id_addrs[oldest_index].type);
+    ESP_LOGI("ble_gap_unpair_oldest_peer_rr", "oldest_peer_id_addr.val: %02X %02X %02X %02X %02X %02X", 
+              peer_id_addrs[oldest_index].val[0],
+              peer_id_addrs[oldest_index].val[1],
+              peer_id_addrs[oldest_index].val[2],
+              peer_id_addrs[oldest_index].val[3],
+              peer_id_addrs[oldest_index].val[4],
+              peer_id_addrs[oldest_index].val[5]);
+#endif
+
+    if (ble_addr_cmp(peer_addr, &peer_id_addrs[oldest_index]) != 0) {
+        return BLE_HS_ENOMEM;
+    }
+
+    return ble_gap_unpair(&peer_id_addrs[oldest_index]);
 }
 
 void

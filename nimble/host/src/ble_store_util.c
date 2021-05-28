@@ -27,6 +27,14 @@ struct ble_store_util_peer_set {
     int status;
 };
 
+struct ble_store_util_peer_rr_set {
+    ble_addr_t *peer_id_addrs;
+    int *peer_rr_id;
+    int num_peers;
+    int max_peers;
+    int status;
+};
+
 static int
 ble_store_util_iter_unique_peer(int obj_type,
                                 union ble_store_value *val,
@@ -54,6 +62,39 @@ ble_store_util_iter_unique_peer(int obj_type,
     }
 
     set->peer_id_addrs[set->num_peers] = val->sec.peer_addr;
+    set->num_peers++;
+
+    return 0;
+}
+
+static int
+ble_store_util_iter_unique_peer_rr(int obj_type,
+                                union ble_store_value *val,
+                                void *arg)
+{
+    struct ble_store_util_peer_rr_set *set;
+    int i;
+
+    BLE_HS_DBG_ASSERT(obj_type == BLE_STORE_OBJ_TYPE_OUR_SEC ||
+                      obj_type == BLE_STORE_OBJ_TYPE_PEER_SEC);
+
+    set = arg;
+
+    /* Do nothing if this peer is a duplicate. */
+    for (i = 0; i < set->num_peers; i++) {
+        if (ble_addr_cmp(set->peer_id_addrs + i, &val->sec.peer_addr) == 0) {
+            return 0;
+        }
+    }
+
+    if (set->num_peers >= set->max_peers) {
+        /* Overflow; abort the iterate procedure. */
+        set->status = BLE_HS_ENOMEM;
+        return 1;
+    }
+
+    set->peer_id_addrs[set->num_peers] = val->sec.peer_addr;
+    set->peer_rr_id[set->num_peers] = val->sec.peer_rr_id;
     set->num_peers++;
 
     return 0;
@@ -99,6 +140,33 @@ ble_store_util_bonded_peers(ble_addr_t *out_peer_id_addrs, int *out_num_peers,
     return 0;
 }
 
+int
+ble_store_util_bonded_peers_rr(ble_addr_t *out_peer_id_addrs, int *out_peer_rr_id,
+                               int *out_num_peers, int max_peers)
+{
+    struct ble_store_util_peer_rr_set set = {
+        .peer_id_addrs = out_peer_id_addrs,
+        .peer_rr_id = out_peer_rr_id,
+        .num_peers = 0,
+        .max_peers = max_peers,
+        .status = 0,
+    };
+    int rc;
+
+    rc = ble_store_iterate(BLE_STORE_OBJ_TYPE_OUR_SEC,
+                           ble_store_util_iter_unique_peer_rr,
+                           &set);
+    if (rc != 0) {
+        return rc;
+    }
+    if (set.status != 0) {
+        return set.status;
+    }
+
+    *out_num_peers = set.num_peers;
+    return 0;
+}
+
 /**
  * Deletes all entries from the store that are attached to the specified peer
  * address.  This function deletes security entries and CCCD records.
@@ -116,21 +184,32 @@ ble_store_util_delete_peer(const ble_addr_t *peer_id_addr)
 
     memset(&key, 0, sizeof key);
     key.sec.peer_addr = *peer_id_addr;
+#if 1
+    ESP_LOGI("ble_store_util_delete_peer", "key.sec.peer_addr: %02X %02X", key.sec.peer_addr.val[0],
+                                                                           key.sec.peer_addr.val[1]);
+#endif
 
     rc = ble_store_util_delete_all(BLE_STORE_OBJ_TYPE_OUR_SEC, &key);
+    ESP_LOGI("ble_store_util_delete_peer", "rc 1: %d", rc);
     if (rc != 0) {
         return rc;
     }
 
     rc = ble_store_util_delete_all(BLE_STORE_OBJ_TYPE_PEER_SEC, &key);
+    ESP_LOGI("ble_store_util_delete_peer", "rc 2: %d", rc);
     if (rc != 0) {
         return rc;
     }
 
     memset(&key, 0, sizeof key);
     key.cccd.peer_addr = *peer_id_addr;
+#if 1
+    ESP_LOGI("ble_store_util_delete_peer", "key.cccd.peer_addr: %02X %02X", key.cccd.peer_addr.val[0],
+                                                                            key.cccd.peer_addr.val[1]);
+#endif
 
     rc = ble_store_util_delete_all(BLE_STORE_OBJ_TYPE_CCCD, &key);
+    ESP_LOGI("ble_store_util_delete_peer", "rc 3: %d", rc);
     if (rc != 0) {
         return rc;
     }
@@ -230,13 +309,17 @@ ble_store_util_delete_oldest_peer(void)
 int
 ble_store_util_status_rr(struct ble_store_status_event *event, void *arg)
 {
+    ESP_LOGI("ble_store_util_status_rr", "event->event_code: %d", event->event_code);
+    ESP_LOGI("ble_store_util_status_rr", "event->overflow.obj_type: %d", event->overflow.obj_type);
     switch (event->event_code) {
     case BLE_STORE_EVENT_OVERFLOW:
         switch (event->overflow.obj_type) {
             case BLE_STORE_OBJ_TYPE_OUR_SEC:
             case BLE_STORE_OBJ_TYPE_PEER_SEC:
+                return ble_gap_unpair_oldest_peer_rr();
             case BLE_STORE_OBJ_TYPE_CCCD:
-                return ble_gap_unpair_oldest_peer();
+                /* Try unpairing oldest peer except current peer */
+                return ble_gap_unpair_oldest_except_rr(&event->overflow.value->cccd.peer_addr);
 
             default:
                 return BLE_HS_EUNKNOWN;

@@ -1238,6 +1238,22 @@ int ble_gap_unpair(const ble_addr_t *peer_addr);
  *                                  error.
  */
 int ble_gap_unpair_oldest_peer(void);
+int ble_gap_unpair_oldest_peer_rr(void);
+
+/**
+ * Similar to `ble_gap_unpair_oldest_peer()`, except it makes sure that the
+ * peer received in input parameters is not deleted.
+ *
+ * @param peer_addr             Address of the peer (not to be deleted)
+ *
+ * @return                      0 on success;
+ *                              A BLE host HCI return code if the controller
+ *                                  rejected the request;
+ *                              A BLE host core return code on unexpected
+ *                                  error.
+ */
+int ble_gap_unpair_oldest_except(const ble_addr_t *peer_addr);
+int ble_gap_unpair_oldest_except_rr(const ble_addr_t *peer_addr);
 
 #define BLE_GAP_PRIVATE_MODE_NETWORK        0
 #define BLE_GAP_PRIVATE_MODE_DEVICE         1
