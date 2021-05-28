@@ -184,32 +184,21 @@ ble_store_util_delete_peer(const ble_addr_t *peer_id_addr)
 
     memset(&key, 0, sizeof key);
     key.sec.peer_addr = *peer_id_addr;
-#if 1
-    ESP_LOGI("ble_store_util_delete_peer", "key.sec.peer_addr: %02X %02X", key.sec.peer_addr.val[0],
-                                                                           key.sec.peer_addr.val[1]);
-#endif
 
     rc = ble_store_util_delete_all(BLE_STORE_OBJ_TYPE_OUR_SEC, &key);
-    ESP_LOGI("ble_store_util_delete_peer", "rc 1: %d", rc);
     if (rc != 0) {
         return rc;
     }
 
     rc = ble_store_util_delete_all(BLE_STORE_OBJ_TYPE_PEER_SEC, &key);
-    ESP_LOGI("ble_store_util_delete_peer", "rc 2: %d", rc);
     if (rc != 0) {
         return rc;
     }
 
     memset(&key, 0, sizeof key);
     key.cccd.peer_addr = *peer_id_addr;
-#if 1
-    ESP_LOGI("ble_store_util_delete_peer", "key.cccd.peer_addr: %02X %02X", key.cccd.peer_addr.val[0],
-                                                                            key.cccd.peer_addr.val[1]);
-#endif
 
     rc = ble_store_util_delete_all(BLE_STORE_OBJ_TYPE_CCCD, &key);
-    ESP_LOGI("ble_store_util_delete_peer", "rc 3: %d", rc);
     if (rc != 0) {
         return rc;
     }
@@ -309,8 +298,6 @@ ble_store_util_delete_oldest_peer(void)
 int
 ble_store_util_status_rr(struct ble_store_status_event *event, void *arg)
 {
-    ESP_LOGI("ble_store_util_status_rr", "event->event_code: %d", event->event_code);
-    ESP_LOGI("ble_store_util_status_rr", "event->overflow.obj_type: %d", event->overflow.obj_type);
     switch (event->event_code) {
     case BLE_STORE_EVENT_OVERFLOW:
         switch (event->overflow.obj_type) {
