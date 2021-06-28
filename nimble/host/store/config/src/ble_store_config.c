@@ -154,16 +154,10 @@ ble_store_config_write_our_sec(const struct ble_store_value_sec *value_sec)
     ble_store_key_from_value_sec(&key_sec, value_sec);
     idx = ble_store_config_find_sec(&key_sec, ble_store_config_our_secs,
                                     ble_store_config_num_our_secs);
-    ESP_LOGI("ble_store_config_write_our_sec", "idx 1: %d", idx);
     if (idx == -1) {
         if (ble_store_config_num_our_secs >= MYNEWT_VAL(BLE_STORE_MAX_BONDS)) {
             BLE_HS_LOG(DEBUG, "error persisting our sec; too many entries "
                               "(%d)\n", ble_store_config_num_our_secs);
-#if 1
-            ESP_LOGI("ble_store_config_write_our_sec", "error persisting our sec; too many entries "
-                      "(%d)\n", ble_store_config_num_our_secs);
-            ESP_LOGI("ble_store_config_write_our_sec", "MYNEWT_VAL(BLE_STORE_MAX_BONDS): %d", MYNEWT_VAL(BLE_STORE_MAX_BONDS));
-#endif
             return BLE_HS_ESTORE_CAP;
         }
 
@@ -171,7 +165,6 @@ ble_store_config_write_our_sec(const struct ble_store_value_sec *value_sec)
         ble_store_config_num_our_secs++;
     }
 
-    ESP_LOGI("ble_store_config_write_our_sec", "idx 2: %d", idx);
     ble_store_config_our_secs[idx] = *value_sec;
     ble_store_config_our_secs_rr_id++;
     ble_store_config_our_secs[idx].peer_rr_id = ble_store_config_our_secs_rr_id;
@@ -214,19 +207,9 @@ ble_store_config_delete_sec(const struct ble_store_key_sec *key_sec,
     int rc;
 
     idx = ble_store_config_find_sec(key_sec, value_secs, *num_value_secs);
-    ESP_LOGI("ble_store_config_delete_sec", "idx: %d", idx);
     if (idx == -1) {
         return BLE_HS_ENOENT;
     }
-#if 1
-    ESP_LOGI("ble_store_config_delete_sec", "value_secs[%d].peer_addr: %02X %02X %02X %02X %02X %02X", idx,
-              value_secs[idx].peer_addr.val[0],
-              value_secs[idx].peer_addr.val[1],
-              value_secs[idx].peer_addr.val[2],
-              value_secs[idx].peer_addr.val[3],
-              value_secs[idx].peer_addr.val[4],
-              value_secs[idx].peer_addr.val[5]);
-#endif
 
     rc = ble_store_config_delete_obj(value_secs, sizeof *value_secs, idx,
                                   num_value_secs);
@@ -304,16 +287,10 @@ ble_store_config_write_peer_sec(const struct ble_store_value_sec *value_sec)
     ble_store_key_from_value_sec(&key_sec, value_sec);
     idx = ble_store_config_find_sec(&key_sec, ble_store_config_peer_secs,
                                  ble_store_config_num_peer_secs);
-    ESP_LOGI("ble_store_config_write_peer_sec", "idx 1: %d", idx);
     if (idx == -1) {
         if (ble_store_config_num_peer_secs >= MYNEWT_VAL(BLE_STORE_MAX_BONDS)) {
             BLE_HS_LOG(DEBUG, "error persisting peer sec; too many entries "
                  "(%d)\n", ble_store_config_num_peer_secs);
-#if 1
-            ESP_LOGI("ble_store_config_write_peer_sec", "error persisting peer sec; too many entries "
-                      "(%d)\n", ble_store_config_num_peer_secs);
-            ESP_LOGI("ble_store_config_write_peer_sec", "MYNEWT_VAL(BLE_STORE_MAX_BONDS): %d", MYNEWT_VAL(BLE_STORE_MAX_BONDS));
-#endif
             return BLE_HS_ESTORE_CAP;
         }
 
@@ -321,7 +298,6 @@ ble_store_config_write_peer_sec(const struct ble_store_value_sec *value_sec)
         ble_store_config_num_peer_secs++;
     }
 
-    ESP_LOGI("ble_store_config_write_peer_sec", "idx 2: %d", idx);
     ble_store_config_peer_secs[idx] = *value_sec;
     ble_store_config_peer_secs_rr_id++;
     ble_store_config_peer_secs[idx].peer_rr_id = ble_store_config_peer_secs_rr_id;
@@ -379,17 +355,9 @@ ble_store_config_delete_cccd(const struct ble_store_key_cccd *key_cccd)
     int rc;
 
     idx = ble_store_config_find_cccd(key_cccd);
-    ESP_LOGI("ble_store_config_delete_cccd", "idx: %d", idx);
     if (idx == -1) {
         return BLE_HS_ENOENT;
     }
-    ESP_LOGI("ble_store_config_delete_cccd", "ble_store_config_cccds[%d].peer_addr: %02X %02X %02X %02X %02X %02X", idx,
-              ble_store_config_cccds[idx].peer_addr.val[0],
-              ble_store_config_cccds[idx].peer_addr.val[1],
-              ble_store_config_cccds[idx].peer_addr.val[2],
-              ble_store_config_cccds[idx].peer_addr.val[3],
-              ble_store_config_cccds[idx].peer_addr.val[4],
-              ble_store_config_cccds[idx].peer_addr.val[5]);
 
     rc = ble_store_config_delete_obj(ble_store_config_cccds,
                                      sizeof *ble_store_config_cccds,
@@ -431,16 +399,10 @@ ble_store_config_write_cccd(const struct ble_store_value_cccd *value_cccd)
 
     ble_store_key_from_value_cccd(&key_cccd, value_cccd);
     idx = ble_store_config_find_cccd(&key_cccd);
-    ESP_LOGI("ble_store_config_write_cccd", "idx 1: %d", idx);
     if (idx == -1) {
         if (ble_store_config_num_cccds >= MYNEWT_VAL(BLE_STORE_MAX_CCCDS)) {
             BLE_HS_LOG(DEBUG, "error persisting cccd; too many entries (%d)\n",
                        ble_store_config_num_cccds);
-#if 1
-            ESP_LOGI("ble_store_config_write_cccd", "error persisting cccd; too many entries (%d)\n",
-                       ble_store_config_num_cccds);
-            ESP_LOGI("ble_store_config_write_cccd", "MYNEWT_VAL(BLE_STORE_MAX_CCCDS): %d", MYNEWT_VAL(BLE_STORE_MAX_CCCDS));
-#endif
             return BLE_HS_ESTORE_CAP;
         }
 
@@ -448,7 +410,6 @@ ble_store_config_write_cccd(const struct ble_store_value_cccd *value_cccd)
         ble_store_config_num_cccds++;
     }
 
-    ESP_LOGI("ble_store_config_write_cccd", "idx 2: %d", idx);
     ble_store_config_cccds[idx] = *value_cccd;
     ble_store_config_cccds_rr_id++;
     ble_store_config_cccds[idx].peer_rr_id = ble_store_config_cccds_rr_id;
@@ -583,7 +544,6 @@ ble_store_config_init(void)
         if (ble_store_config_our_secs_rr_id < ble_store_config_our_secs[i].peer_rr_id)
             ble_store_config_our_secs_rr_id = ble_store_config_our_secs[i].peer_rr_id;
     }
-    ESP_LOGI("ble_store_config_init", "ble_store_config_our_secs_rr_id: %d", ble_store_config_our_secs_rr_id);
 
     ble_store_config_peer_secs_rr_id = 0;
     for (int i=0; i<ble_store_config_num_peer_secs; i++)
@@ -591,7 +551,6 @@ ble_store_config_init(void)
         if (ble_store_config_peer_secs_rr_id < ble_store_config_peer_secs[i].peer_rr_id)
             ble_store_config_peer_secs_rr_id = ble_store_config_peer_secs[i].peer_rr_id;
     }
-    ESP_LOGI("ble_store_config_init", "ble_store_config_peer_secs_rr_id: %d", ble_store_config_peer_secs_rr_id);
 
     ble_store_config_cccds_rr_id = 0;
     for (int i=0; i<ble_store_config_num_cccds; i++)
@@ -599,5 +558,4 @@ ble_store_config_init(void)
         if (ble_store_config_cccds_rr_id < ble_store_config_cccds[i].peer_rr_id)
             ble_store_config_cccds_rr_id = ble_store_config_cccds[i].peer_rr_id;
     }
-    ESP_LOGI("ble_store_config_init", "ble_store_config_cccds_rr_id: %d", ble_store_config_cccds_rr_id);
 }
