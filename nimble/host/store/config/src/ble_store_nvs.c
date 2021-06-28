@@ -603,6 +603,10 @@ int ble_store_config_persist_cccds(void)
                  ble_store_config_cccds[i].peer_addr.val[4],
                  ble_store_config_cccds[i].peer_addr.val[5]);
     }
+    if (nvs_count == -1) {
+        ESP_LOGE(TAG, "NVS operation failed while persisting CCCD");
+        return BLE_HS_ESTORE_FAIL;
+    }
 
     if (nvs_count < ble_store_config_num_cccds) {
 
@@ -650,6 +654,10 @@ int ble_store_config_persist_peer_secs(void)
                  ble_store_config_peer_secs[i].peer_addr.val[4],
                  ble_store_config_peer_secs[i].peer_addr.val[5]);
     }
+    if (nvs_count == -1) {
+        ESP_LOGE(TAG, "NVS operation failed while persisting peer sec");
+        return BLE_HS_ESTORE_FAIL;
+    }
 
     if (nvs_count < ble_store_config_num_peer_secs) {
 
@@ -696,6 +704,10 @@ int ble_store_config_persist_our_secs(void)
                   ble_store_config_our_secs[i].peer_addr.val[3],
                   ble_store_config_our_secs[i].peer_addr.val[4],
                   ble_store_config_our_secs[i].peer_addr.val[5]);
+    }
+    if (nvs_count == -1) {
+        ESP_LOGE(TAG, "NVS operation failed while persisting our sec");
+        return BLE_HS_ESTORE_FAIL;
     }
 
     if (nvs_count < ble_store_config_num_our_secs) {
@@ -761,6 +773,10 @@ int ble_store_persist_peer_records(void)
                   peer_dev_rec[i].identity_addr[3],
                   peer_dev_rec[i].identity_addr[4],
                   peer_dev_rec[i].identity_addr[5]);
+    }
+    if (nvs_count == -1) {
+        ESP_LOGE(TAG, "NVS operation failed while persisting peer_dev_rec");
+        return BLE_HS_ESTORE_FAIL;
     }
 
     if (nvs_count < ble_store_num_peer_dev_rec) {
