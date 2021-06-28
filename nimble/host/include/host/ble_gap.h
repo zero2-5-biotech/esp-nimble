@@ -1238,6 +1238,7 @@ int ble_gap_unpair(const ble_addr_t *peer_addr);
  *                                  error.
  */
 int ble_gap_unpair_oldest_peer(void);
+int ble_gap_unpair_oldest_peer_rr(void);
 
 /**
  * Similar to `ble_gap_unpair_oldest_peer()`, except it makes sure that the
@@ -1252,6 +1253,7 @@ int ble_gap_unpair_oldest_peer(void);
  *                                  error.
  */
 int ble_gap_unpair_oldest_except(const ble_addr_t *peer_addr);
+int ble_gap_unpair_oldest_except_rr(const ble_addr_t *peer_addr);
 
 #define BLE_GAP_PRIVATE_MODE_NETWORK        0
 #define BLE_GAP_PRIVATE_MODE_DEVICE         1
