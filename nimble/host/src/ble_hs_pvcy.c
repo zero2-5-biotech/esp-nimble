@@ -182,9 +182,9 @@ ble_hs_pvcy_add_entry(const uint8_t *addr, uint8_t addr_type,
      * list (Vol 2, Part E, 7.8.38).  Stop all GAP procedures and temporarily
      * prevent any new ones from being started.
      */
-#if (MYNEWT_VAL(BLE_HOST_BASED_PRIVACY))
-    rc = ble_hs_pvcy_add_entry_hci(addr, addr_type, irk);
-#else
+//#if (MYNEWT_VAL(BLE_HOST_BASED_PRIVACY))
+    //rc = ble_hs_pvcy_add_entry_hci(addr, addr_type, irk);
+//#else
     ble_gap_preempt();
 
     /* Try to add the entry now that GAP is halted. */
@@ -193,7 +193,7 @@ ble_hs_pvcy_add_entry(const uint8_t *addr, uint8_t addr_type,
     /* Allow GAP procedures to be started again. */
     ble_gap_preempt_done();
 
-#endif
+//#endif
     if (rc != 0) {
         STATS_INC(ble_hs_stats, pvcy_add_entry_fail);
     }
